@@ -3,9 +3,9 @@ const { signToken, AuthenticationError } = require('../utils/auth');
 
 const resolvers = {
   Query: {
-    getSingleUser: async (parent, {_id } ) => {
+    getSingleUser: async (parent, {username } ) => {
       const foundUser = await User.findOne({
-        _id: _id
+        username: username
       });
   
       if (!foundUser) {
@@ -45,7 +45,8 @@ const resolvers = {
 
       return { token, user };
     },
-    deleteBook: async (parent, { _id, deleteId }) => {
+    deleteBook: async (parent, { _id, deleteId }, context) => {
+      if (context) {
       const updatedUser = await User.findOneAndUpdate(
         { _id: _id },
         { $pull: { savedBooks: { bookId: deleteId } } },
@@ -55,6 +56,8 @@ const resolvers = {
         return "Couldn't find user with this id!";
       }
       return updatedUser;
+    }
+    throw AuthenticationError;
     }
   },
 };
